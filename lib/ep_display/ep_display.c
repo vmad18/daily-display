@@ -196,7 +196,7 @@ void display_buff_at(
 void display_from_grid(void) {
     spi_write_byte(0x13, PIN_LOW);
 
-    for(EBYTE y = 0; y < max_y; y++) {
+    for(EBYTE y = 0; y < HEIGHT; y++) {
         for(EBYTE x = 0; x < WIDTH / 8; x++) {
             EBYTE idx = y * WIDTH / 8 + x; 
             spi_write_byte(~(*(grid + idx)), PIN_HIGH);
@@ -243,7 +243,6 @@ void reset(void) {
 }
 
 void sleep(void) {
-
     spi_write_byte(0X02, PIN_LOW);
     hang_till_done();
     spi_write_byte(0X07, PIN_LOW);

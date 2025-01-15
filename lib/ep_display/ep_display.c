@@ -1,7 +1,5 @@
 #include "ep_display.h"
 
-
-
 // maybe dynamically allocate this?
 static BYTE grid[48000] = {~0x00};
 static DBYTE max_x = 0; 
@@ -204,6 +202,12 @@ void display_from_grid(void) {
     }
     
     refresh_display();
+}
+
+void draw_pixel_at(const EBYTE x, const EBYTE y)  {
+    EBYTE idx = y * WIDTH / 8 + x / 8;
+    grid[idx] |= (0x80 >> (x % 8));
+    grid[idx] = ~grid[x + y * WIDTH / 8];
 }
 
 void insert_in_grid(const BYTE *buff, EBYTE x_start, EBYTE y_start, EBYTE width, EBYTE height) {

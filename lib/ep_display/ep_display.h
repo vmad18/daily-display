@@ -16,6 +16,7 @@ void display_img_buff(const BYTE*);
 void display_buff_at(const BYTE*, EBYTE, EBYTE, EBYTE, EBYTE);
 
 void display_from_grid(void);
+void draw_pixel_at(const EBYTE, const EBYTE);
 void insert_in_grid(const BYTE*, EBYTE, EBYTE, EBYTE, EBYTE);
 
 void clear(void); 

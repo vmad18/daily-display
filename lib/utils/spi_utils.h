@@ -4,17 +4,10 @@
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
 #include "stdio.h"
-
-#define BYTE uint8_t
-#define DBYTE uint16_t
-#define FBYTE uint32_t
-#define EBYTE uint64_t
+#include "utils.h"
 
 #define BAUD_RATE 2000000
 #define SPI_PORT spi0
-
-#define PIN_HIGH 1
-#define PIN_LOW 0
 
 extern DBYTE RST_PIN;
 extern DBYTE DC_PIN;

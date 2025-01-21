@@ -17,6 +17,8 @@ void display_buff_at(const BYTE*, EBYTE, EBYTE, EBYTE, EBYTE);
 
 void display_from_grid(void);
 void draw_pixel_at(const EBYTE, const EBYTE);
+void draw_line_between(int x1, int y1, int x2, int y2);
+void draw_dotted_horizontal(int x1, int x2, int y);
 void insert_in_grid(const BYTE*, EBYTE, EBYTE, EBYTE, EBYTE);
 
 void clear(void); 

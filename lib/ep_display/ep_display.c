@@ -1,4 +1,5 @@
 #include "ep_display.h"
+#include "stdlib.h"
 
 // maybe dynamically allocate this?
 static BYTE grid[48000] = {~0x00};
@@ -207,19 +208,61 @@ void display_from_grid(void) {
 void draw_pixel_at(const EBYTE x, const EBYTE y)  {
     EBYTE idx = y * WIDTH / 8 + x / 8;
     grid[idx] |= (0x80 >> (x % 8));
-    grid[idx] = ~grid[x + y * WIDTH / 8];
+    grid[idx] = ~grid[y * WIDTH / 8 + x];
 }
+
+void draw_line_between(int x1, int y1, int x2, int y2) {
+    int dx = abs(x2 - x1);
+    int dy = abs(y2 - y1);
+
+    int sx = x1 < x2 ? 1 : -1;  // Step in x direction
+    int sy = y1 < y2 ? 1 : -1;  // Step in y direction
+    
+    int err = (dx > dy ? dx : -dy) / 2;
+    int e2;
+    
+    while (1) {
+        draw_pixel_at(x1, y1);
+        if (x1 == x2 && y1 == y2) {
+            break;
+        }
+        e2 = err;
+        if (e2 > -dx) {
+            err -= dy;
+            x1 += sx;
+        }
+
+        if (e2 < dy) {
+            err += dx;
+            y1 += sy;
+        }
+    }
+}
+
+void draw_dotted_horizontal(int x1, int x2, int y) {
+    for(EBYTE x = x1 / 4 ; x <= x2 / 4; x+=4) {
+        draw_pixel_at(4*x, y);
+    }
+}
+
 
 void insert_in_grid(const BYTE *buff, EBYTE x_start, EBYTE y_start, EBYTE width, EBYTE height) {
     
     max_x = max_x > (x_start + width) ? max_x : (x_start + width); 
     max_y = max_y > y_start + height ? max_y : y_start + height;
 
+    x_start = x_start % 8 ? x_start + 8 - (x_start % 8) : x_start;
+
+    EBYTE x_end = x_start + width;
+    // x_end += x_end % 8 ? x_end + 8 - (x_end % 8) : x_end;
+
     for(EBYTE y = y_start; y < y_start + height; y++) {
-        for(EBYTE x = x_start / 8; x < (x_start + width) / 8; x++) {
+        for(EBYTE x = x_start / 8; x < x_end / 8; x++) {
+            // if(8*(x - x_start) < width) {
                 EBYTE grid_idx = y * WIDTH / 8 + x;
                 EBYTE buff_idx = (y - y_start) * width / 8 + x - x_start / 8;
                 *(grid + grid_idx) = *(buff + buff_idx);
+           //  }
         }
     }
 }

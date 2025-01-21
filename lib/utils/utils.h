@@ -10,6 +10,4 @@
 #define PIN_HIGH 1
 #define PIN_LOW 0
 
-
-
 #endif

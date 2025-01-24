@@ -1,11 +1,28 @@
 #include "network.h"
 
-#ifdef _PICO_CYW43_ARCH_H
-    #define LED_GPIO_PUT cyw43_arch_gpio_put 
-#else
-    #define LED_GPIO_PUT gpio_put
-#endif
-
+data_packet_t data = {    
+    .visibility = 0.0f,
+    .days = {
+        {"Day", "cloudy", 0, 0}, 
+        {"Day", "cloudy", 0, 0},
+        {"Day", "cloudy", 0, 0},
+        {"Day", "cloudy", 0, 0},
+        {"Day", "cloudy", 0, 0}},
+    .sunrise = "07:15",
+    .sunset = "08:20",
+    .location = "London, UK",
+    .curr_desc = "clouds",
+    .curr_time = "69:69",
+    .curr_date = "Sunday,_September_27th",
+    .temp = 0,
+    .feel_temp = 0,
+    .humidity = 0,
+    .wind = 0,
+    .pressure = 0,
+    .aqi = 0,
+    .uv = 0,
+    .hours = {10, 20, 30, 40}};
+    
 static struct netif ap_netif;
 void udp_reciver(
                 void *arg, 
@@ -14,11 +31,40 @@ void udp_reciver(
                 const ip_addr_t *addr, 
                 u16_t port) {
     if(p){
-        printf("Received UDP packet from %s:%d: %.*s\n", ipaddr_ntoa(addr), port, p->tot_len, (char *)p->payload);
+        char *received = (char *) p->payload;
+        uint8_t b1 = received[p->tot_len - 2];
+        uint8_t b2 = received[p->tot_len - 1];
+
+        uint16_t id = (((uint16_t) b1) << 8) | (((uint16_t) b2) & 0x00ff);
+
+        uint16_t weather_id = (((uint16_t) *received) << 8) | (((uint16_t) *(received + 1)) & 0x0ff);
+
+        // printf("received udp packet from %s:%d: %.*s\n", ipaddr_ntoa(addr), port, p->tot_len - 2, (received + 2));
+        // printf("packet id: %d\n", id);
+
+        if(!weather_id) {
+            sscanf(received + 2, "%d %d %29s %d %d %f %d %29s %7s %7s %d %d %29s %29s", &data.temp, &data.feel_temp, data.curr_desc, &data.humidity, &data.aqi, &data.visibility, &data.pressure, data.location, data.sunrise, data.sunset, &data.uv, &data.wind, data.curr_date, data.curr_time);
+            printf("INFO: %d %s %d %d %f %d %s %s %s %d %d\n", data.temp, data.curr_desc, data.humidity, data.aqi, data.visibility, data.pressure, data.location, data.sunrise, data.sunset, data.uv, data.wind);
+        } else if(weather_id < 6 && weather_id > 0) {
+            day_info_t day_info;
+            sscanf(received + 2, "%9s %29s %d %d", day_info.day, day_info.desc, &day_info.high, &day_info.low);
+            data.days[weather_id - 1] = day_info;
+            // printf("INFO: %3s %s %d %d\n", day_info.day, day_info.desc, day_info.high, day_info.low);
+        } else if(weather_id == 7) {
+            int *hours = data.hours;
+            sscanf(received + 2, "%d %d %d %d", hours, hours + 1, hours + 2, hours + 3);
+            // printf("INFO: %d %d %d %d\n", *hours, hours[1], hours[2], hours[3]);
+        }
+
+        if (!weather_id) {
+            sscanf(received + 2, "%d %29s %d %d %f %d %29s", &data.temp, data.curr_desc, &data.humidity, &data.aqi, &data.visibility, &data.pressure, data.location);
+            // printf("INFO: %d %s %d %d %f %d %s\n", data.temp, data.curr_desc, data.humidity, data.aqi, data.visibility, data.pressure, data.location);
+        }
 
         struct pbuf *response = pbuf_alloc(PBUF_TRANSPORT, p->tot_len, PBUF_RAM);
         if (response) {
-            memcpy(response->payload, "Acknowledged\n", 13);
+            unsigned char send_bytes[2] = {b1, b2};
+            memcpy(response->payload, send_bytes, 2);
             udp_sendto(pcb, response, addr, port);
             pbuf_free(response);
         }
@@ -28,9 +74,8 @@ void udp_reciver(
 }
 
 uint8_t start_ap(void) {
-    const uint8_t LED_PIN = CYW43_WL_GPIO_LED_PIN;
 
-    printf("Initializing PICOW as AP...\n");
+    printf("Initializing PICO-W as AP...\n");
     if (cyw43_arch_init()) {
         printf("Failed to init wifi\n");
         return 1;
@@ -59,13 +104,6 @@ uint8_t start_ap(void) {
     udp_recv(server, udp_reciver, NULL);
 
     printf("UDP server listening on port %d\n", UDP_PORT);
-    while (1) {
-        // cyw43_arch_poll(); // Poll for WiFi events
-        LED_GPIO_PUT(LED_PIN, 1);
-        sleep_ms(250);
-        LED_GPIO_PUT(LED_PIN, 0);
-        sleep_ms(1000);
-    }
 
     return 0;
 }

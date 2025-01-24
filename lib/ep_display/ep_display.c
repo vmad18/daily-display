@@ -135,9 +135,6 @@ void init_display(void) {
 	spi_write_byte(0x24, PIN_LOW); //LUTBB
 	for(count=0; count<42; count++)
 		spi_write_byte(LUT_BB[count], PIN_HIGH);
-
-    
-
 }
 
 void refresh_display(void) {
@@ -273,7 +270,9 @@ void clear(void) {
     for(DBYTE i = 0; i < HEIGHT; i++) {
         for(DBYTE j = 0; j < WIDTH; j++) {
             spi_write_byte(0x00, PIN_HIGH);
-            *(grid + i * WIDTH / 8 + j) = ~(0x00);
+            if(j < WIDTH / 8) {
+                *(grid + i * WIDTH / 8 + j) = ~(0x00);
+            }
         }
     }
     

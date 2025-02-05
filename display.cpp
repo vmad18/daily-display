@@ -44,14 +44,16 @@ int main() {
         LED_GPIO_PUT(LED_PIN, 0);
         sleep_ms(1000);
         
-        cyw43_arch_wait_for_work_until(make_timeout_time_ms(10000));
+       cyw43_arch_wait_for_work_until(make_timeout_time_ms(10000));
         uint64_t curr_time = time_us_64();
 
-        if(curr_time - start_time > 30 * 3000000){
+        if(curr_time - start_time > 3600 * .5 * 3000000 || data.updated){
+            data.updated = false;
             clear();
             clock.update();
             display_from_grid();
             start_time = curr_time;
+            sleep_ms(2500);
         }
     }
     return 0;

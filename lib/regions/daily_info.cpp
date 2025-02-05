@@ -54,7 +54,9 @@ void DailyInfo::update(void) const {
     char buff_loc[] = "College Park, MD";
     display_text(buff_loc, 850 - strlen(buff_loc) * 19, 0, 0);
 
-    insert_in_grid(rain_wind_128px, 5, 5, 128, 128);
+    loadWeatherIcons128();
+    insert_in_grid(getWeatherIcon(getWeatherIconCode(data.curr_desc, data.day)), 5, 5, 128, 128);
+    printf("%s\n", getWeatherIconCode(data.curr_desc, data.day));
 
     load16();
     sprintf(text, "Feels like %d", data.feel_temp);    
@@ -134,36 +136,37 @@ void DailyInfo::update(void) const {
         data.days[i].day[3] = '\0';
     }
 
+    loadWeatherIcons48();
     sprintf(text, "%d|%d", data.days[0].high, data.days[0].low);
-    insert_in_grid(day_cloudy_high_48px, start_icon, start_height + HEIGHT_SHIFT, 48, 48);
+    insert_in_grid(getWeatherIcon(getWeatherIconCode(data.days[0].desc, 1)), start_icon, start_height + HEIGHT_SHIFT, 48, 48);
     DBYTE padding = display_text(text, start_txt - 8, start_height + HEIGHT_SHIFT + 38, 2);
     insert_in_grid(fahrenheit_32px, start_txt + padding - 14, start_height + HEIGHT_SHIFT + 38, 32, 32);
     display_text(text, start_txt - 8, start_height + HEIGHT_SHIFT + 38, 2);
     display_text(data.days[0].day, start_txt, start_height, 2); 
     
     sprintf(text, "%d|%d", data.days[1].high, data.days[1].low);
-    insert_in_grid(day_cloudy_48px, start_icon + X_GAP, start_height + HEIGHT_SHIFT, 48, 48);
+    insert_in_grid(getWeatherIcon(getWeatherIconCode(data.days[1].desc, 1)), start_icon + X_GAP, start_height + HEIGHT_SHIFT, 48, 48);
     padding = display_text(text, start_txt - 8 + X_GAP, start_height + HEIGHT_SHIFT + 38, 2);
     insert_in_grid(fahrenheit_32px, start_txt + padding - 15 + X_GAP, start_height + HEIGHT_SHIFT + 38, 32, 32);
     display_text(text, start_txt - 8 + X_GAP, start_height + HEIGHT_SHIFT + 38, 2);
     display_text(data.days[1].day, start_txt + X_GAP, start_height, 2); 
 
     sprintf(text, "%d|%d", data.days[2].high, data.days[2].low);
-    insert_in_grid(day_sunny_48px, start_icon + 2 * X_GAP, start_height + HEIGHT_SHIFT, 48, 48);
+    insert_in_grid(getWeatherIcon(getWeatherIconCode(data.days[2].desc, 1)), start_icon + 2 * X_GAP, start_height + HEIGHT_SHIFT, 48, 48);
     padding = display_text(text, start_txt - 12 + 2 * X_GAP, start_height + HEIGHT_SHIFT + 38, 2);
     insert_in_grid(fahrenheit_32px, start_txt + padding - 20 + 2 * X_GAP, start_height + HEIGHT_SHIFT + 38, 32, 32);
     display_text(text, start_txt - 12 + 2 * X_GAP, start_height + HEIGHT_SHIFT + 38, 2);
     display_text(data.days[2].day, start_txt + 2 * X_GAP, start_height, 0); 
 
     sprintf(text, "%d|%d", data.days[3].high, data.days[3].low);
-    insert_in_grid(rain_wind_48px, start_icon + 3 * X_GAP, start_height + HEIGHT_SHIFT, 48, 48);
+    insert_in_grid(getWeatherIcon(getWeatherIconCode(data.days[3].desc, 1)), start_icon + 3 * X_GAP, start_height + HEIGHT_SHIFT, 48, 48);
     padding = display_text(text, start_txt - 8 + 3 * X_GAP, start_height + HEIGHT_SHIFT + 38, 2);
     insert_in_grid(fahrenheit_32px, start_txt + padding - 20 + 3 * X_GAP, start_height + HEIGHT_SHIFT + 38, 32, 32);
     display_text(text, start_txt - 8 + 3 * X_GAP, start_height + HEIGHT_SHIFT + 38, 2);
     display_text(data.days[3].day, start_txt + 3 * X_GAP, start_height, 0); 
 
     sprintf(text, "%d|%d", data.days[4].high, data.days[4].low);
-    insert_in_grid(day_showers_48px, start_icon + 4 * X_GAP, start_height + HEIGHT_SHIFT, 48, 48);
+    insert_in_grid(getWeatherIcon(getWeatherIconCode(data.days[4].desc, 1)), start_icon + 4 * X_GAP, start_height + HEIGHT_SHIFT, 48, 48);
     padding = display_text(text, start_txt - 8 + 4 * X_GAP, start_height + HEIGHT_SHIFT + 38, 2);
     insert_in_grid(fahrenheit_32px, start_txt + padding - 15 + 4 * X_GAP, start_height + HEIGHT_SHIFT + 38, 32, 32);
     display_text(text, start_txt - 8 + 4 * X_GAP, start_height + HEIGHT_SHIFT + 38, 2);
@@ -222,7 +225,6 @@ void DailyInfo::update(void) const {
     DBYTE x_val4 = 350 + chunk * 11.5;
     DBYTE y_val4 = temp_to_y(min_temp, max_temp, min_y, max_y, data.hours[3]);
     draw_line_between(x_val3, y_val3, x_val4, y_val4);
-
 
     for(int i = 1; i < 3; i++) {
         draw_line_between(355, 400+i, 750, 400+i);

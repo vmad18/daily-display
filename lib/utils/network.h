@@ -30,21 +30,13 @@
 #endif
 
 typedef struct {
-    char day[10];
-    char desc[30];
     int low; 
     int high;
-}day_info_t;
+    char day[10];
+    char desc[30];
+} day_info_t;
 
 typedef struct {
-    float visibility;
-    day_info_t days[5];
-    char sunrise[8];
-    char sunset[8];
-    char location[30];
-    char curr_desc[30];
-    char curr_date[30];
-    char curr_time[30];
     int temp;
     int feel_temp;
     int humidity;
@@ -53,7 +45,18 @@ typedef struct {
     int aqi;
     int uv;
     int hours[4];
+    int day;        
+    float visibility;  
+    day_info_t days[5];
+    bool updated;
+    char sunrise[8];
+    char sunset[8]; 
+    char location[30];
+    char curr_desc[30];
+    char curr_date[30];  
+    char curr_time[30];  
 } data_packet_t;
+
 
 extern data_packet_t data;
 

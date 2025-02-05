@@ -21,7 +21,9 @@ data_packet_t data = {
     .pressure = 0,
     .aqi = 0,
     .uv = 0,
-    .hours = {10, 20, 30, 40}};
+    .hours = {10, 20, 30, 40},
+    .updated = false,
+    .day = true,};
     
 static struct netif ap_netif;
 void udp_reciver(
@@ -43,8 +45,8 @@ void udp_reciver(
         // printf("packet id: %d\n", id);
 
         if(!weather_id) {
-            sscanf(received + 2, "%d %d %29s %d %d %f %d %29s %7s %7s %d %d %29s %29s", &data.temp, &data.feel_temp, data.curr_desc, &data.humidity, &data.aqi, &data.visibility, &data.pressure, data.location, data.sunrise, data.sunset, &data.uv, &data.wind, data.curr_date, data.curr_time);
-            printf("INFO: %d %s %d %d %f %d %s %s %s %d %d\n", data.temp, data.curr_desc, data.humidity, data.aqi, data.visibility, data.pressure, data.location, data.sunrise, data.sunset, data.uv, data.wind);
+            sscanf(received + 2, "%d %d %29s %d %d %f %d %29s %7s %7s %d %d %29s %29s %d\n", &data.temp, &data.feel_temp, data.curr_desc, &data.humidity, &data.aqi, &data.visibility, &data.pressure, data.location, data.sunrise, data.sunset, &data.uv, &data.wind, data.curr_date, data.curr_time, &data.day);
+            printf("INFO: %d %s %d %d %f %d %s %s %s %d %d %d\n", data.temp, data.curr_desc, data.humidity, data.aqi, data.visibility, data.pressure, data.location, data.sunrise, data.sunset, data.uv, data.wind, data.day);
         } else if(weather_id < 6 && weather_id > 0) {
             day_info_t day_info;
             sscanf(received + 2, "%9s %29s %d %d", day_info.day, day_info.desc, &day_info.high, &day_info.low);
@@ -61,6 +63,7 @@ void udp_reciver(
             // printf("INFO: %d %s %d %d %f %d %s\n", data.temp, data.curr_desc, data.humidity, data.aqi, data.visibility, data.pressure, data.location);
         }
 
+        data.updated = true;
         struct pbuf *response = pbuf_alloc(PBUF_TRANSPORT, p->tot_len, PBUF_RAM);
         if (response) {
             unsigned char send_bytes[2] = {b1, b2};
